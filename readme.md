@@ -1,4 +1,4 @@
-# [maronat.dev](maronato.dev) Prerender service
+# [maronato.dev](maronato.dev) Prerender service
 
 [Prerender.io](https://prerender.io/) service used to cache http responses to web crawlers and bots.
 
