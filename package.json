@@ -4,8 +4,8 @@
   "main": "server.js",
   "license": "MIT",
   "dependencies": {
+    "aws-sdk": "^2.734.0",
     "prerender": "^5.8.0",
-    "prerender-aws-s3-cache": "^1.0.1",
     "prerender-memory-cache": "^1.0.2"
   }
 }
