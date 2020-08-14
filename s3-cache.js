@@ -32,7 +32,7 @@ module.exports = function s3Cache() {
         return;
       }
     }
-    const Rules = (data.Rules ? data.Rules : []).filter(
+    const Rules = (data && data.Rules ? data.Rules : []).filter(
       (rule) => rule.ID !== newRule.ID
     );
     Rules.push(newRule);
