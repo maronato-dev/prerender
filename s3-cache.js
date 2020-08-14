@@ -6,7 +6,6 @@ const endpoint = process.env.AWS_ENDPOINT;
 
 const s3 = new AWS.S3({
   endpoint,
-  region,
   params: {
     Bucket: bucketName,
   },
