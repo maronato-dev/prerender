@@ -20,7 +20,9 @@ RUN apk add --update-cache chromium \
 
 # Add the server file
 COPY ./server.js .
+COPY ./s3-cache.js .
 COPY ./package.json .
+COPY ./yarn.lock .
 
 # Install node deps
 RUN yarn
