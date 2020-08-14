@@ -17,15 +17,14 @@ RUN chown -R user:user /app && chmod -R 755 /app
 RUN apk add --update-cache chromium \
   && rm -rf /var/cache/apk/* /tmp/*
 
+# Install node deps
+COPY ./package.json .
+COPY ./yarn.lock .
+RUN yarn
 
 # Add the server file
 COPY ./server.js .
 COPY ./s3-cache.js .
-COPY ./package.json .
-COPY ./yarn.lock .
-
-# Install node deps
-RUN yarn
 
 USER user
 EXPOSE 3000
