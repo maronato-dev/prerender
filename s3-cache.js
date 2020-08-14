@@ -25,24 +25,34 @@ module.exports = function s3Cache() {
     Status: "Enabled",
   };
   // Configure lifecycle on load
+  console.log(
+    `[Prerender S3 Cache] Configuring ${expirationDays} day expiration on '${objectPrefix}' keys`
+  );
   s3.getBucketLifecycleConfiguration((getErr, data) => {
     if (getErr) {
       if (getErr.code !== "NoSuchLifecycleConfiguration") {
-        console.error(getErr, getErr.stack);
+        console.error("[Prerender S3 Cache]", getErr, getErr.stack);
         return;
       }
     }
     const Rules = (data && data.Rules ? data.Rules : []).filter(
       (rule) => rule.ID !== newRule.ID
     );
+    if (Rules.length > 0) {
+      console.log(
+        `[Prerender S3 Cache] ${Rules.length} lifecycle rules already exist. Updating...`
+      );
+    }
     Rules.push(newRule);
     s3.putBucketLifecycleConfiguration(
       { Bucket: bucketName, LifecycleConfiguration: { Rules } },
       (putErr) => {
         if (putErr) {
-          console.error(putErr, putErr.stack);
+          console.error("[Prerender S3 Cache]", putErr, putErr.stack);
         } else {
-          console.log(`${bucketName} lifecycle rules updated`);
+          console.log(
+            `[Prerender S3 Cache] ${bucketName} lifecycle rules updated.`
+          );
         }
       }
     );
@@ -60,6 +70,7 @@ module.exports = function s3Cache() {
         key = objectPrefix + "/" + key;
       }
 
+      console.log(`[Prerender S3 Cache] Getting '${key}'`);
       s3.getObject(
         {
           Bucket: bucketName,
@@ -67,8 +78,10 @@ module.exports = function s3Cache() {
         },
         function (err, result) {
           if (!err && result) {
+            console.log(`[Prerender S3 Cache] Found '${key}'.`);
             return res.send(200, result.Body);
           }
+          console.log(`[Prerender S3 Cache] Could not find '${key}'.`);
 
           next();
         }
@@ -86,6 +99,7 @@ module.exports = function s3Cache() {
         key = objectPrefix + "/" + key;
       }
 
+      console.log(`[Prerender S3 Cache] Saving '${key}'.`);
       s3.putObject(
         {
           Bucket: bucketName,
@@ -95,7 +109,9 @@ module.exports = function s3Cache() {
           Body: req.prerender.content,
         },
         function (err, result) {
-          if (err) console.error(err);
+          if (err) console.error("[Prerender S3 Cache]", err);
+
+          console.log(`[Prerender S3 Cache] Saved '${key}'.`);
 
           next();
         }
