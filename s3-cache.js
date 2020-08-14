@@ -1,3 +1,4 @@
+// @ts-check
 const AWS = require("aws-sdk");
 
 const objectPrefix = process.env.S3_PREFIX_KEY || "prerender";
@@ -14,8 +15,11 @@ const s3 = new AWS.S3({
 module.exports = function s3Cache() {
   const expirationDays = parseInt(process.env.S3_EXPIRATION_DAYS, 10) || 7;
   const lifecycleRuleId = `prerender-expiration-rule-prefix_${objectPrefix}`;
+  /**
+   * @type AWS.S3.LifecycleRule
+   */
   const newRule = {
-    Expiration: { days: expirationDays },
+    Expiration: { Days: expirationDays },
     Filter: { Prefix: `${objectPrefix}/` },
     ID: lifecycleRuleId,
     Status: "Enabled",
@@ -30,7 +34,7 @@ module.exports = function s3Cache() {
       );
       Rules.push(newRule);
       s3.putBucketLifecycleConfiguration(
-        { LifecycleConfiguration: { Rules } },
+        { Bucket: bucketName, LifecycleConfiguration: { Rules } },
         (putErr) => {
           if (putErr) {
             console.error(putErr, putErr.stack);
@@ -56,6 +60,7 @@ module.exports = function s3Cache() {
 
       s3.getObject(
         {
+          Bucket: bucketName,
           Key: key,
         },
         function (err, result) {
@@ -81,6 +86,7 @@ module.exports = function s3Cache() {
 
       s3.putObject(
         {
+          Bucket: bucketName,
           Key: key,
           ContentType: "text/html;charset=UTF-8",
           StorageClass: "REDUCED_REDUNDANCY",
