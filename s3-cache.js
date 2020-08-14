@@ -27,23 +27,25 @@ module.exports = function s3Cache() {
   // Configure lifecycle on load
   s3.getBucketLifecycleConfiguration((getErr, data) => {
     if (getErr) {
-      console.error(getErr, getErr.stack);
-    } else {
-      const Rules = (data.Rules ? data.Rules : []).filter(
-        (rule) => rule.ID !== newRule.ID
-      );
-      Rules.push(newRule);
-      s3.putBucketLifecycleConfiguration(
-        { Bucket: bucketName, LifecycleConfiguration: { Rules } },
-        (putErr) => {
-          if (putErr) {
-            console.error(putErr, putErr.stack);
-          } else {
-            console.log(`${bucketName} lifecycle rules updated`);
-          }
-        }
-      );
+      if (getErr.code !== "NoSuchLifecycleConfiguration") {
+        console.error(getErr, getErr.stack);
+        return;
+      }
     }
+    const Rules = (data.Rules ? data.Rules : []).filter(
+      (rule) => rule.ID !== newRule.ID
+    );
+    Rules.push(newRule);
+    s3.putBucketLifecycleConfiguration(
+      { Bucket: bucketName, LifecycleConfiguration: { Rules } },
+      (putErr) => {
+        if (putErr) {
+          console.error(putErr, putErr.stack);
+        } else {
+          console.log(`${bucketName} lifecycle rules updated`);
+        }
+      }
+    );
   });
 
   return {
